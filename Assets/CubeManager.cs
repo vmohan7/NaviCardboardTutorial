@@ -9,14 +9,47 @@ public class CubeManager : MonoBehaviour {
 
 	void Start () {
 		ps = GetComponent<ParticleSystem> ();
+		TouchManager.OnDoubleTap += HandleDoubleTap;
+		GestureManager.OnThreeFingerTap += ChangeToRandomColor;
+
+		TouchManager.OnTouchDown += HandleTouchDown;
+		TouchManager.OnTouchMove += HandleTouchMove;
+
+		GestureManager.OnFiveFingerTap += OnReset;
 	}
 
 	void OnDestroy(){
-		//Called when GameObject is destroyed
+		TouchManager.OnDoubleTap -= HandleDoubleTap;
+		GestureManager.OnThreeFingerTap -= ChangeToRandomColor;
+
+		TouchManager.OnTouchDown -= HandleTouchDown;
+		TouchManager.OnTouchMove -= HandleTouchMove;
+
+		GestureManager.OnFiveFingerTap -= OnReset;
 	}
 
 	private void ChangeToRandomColor(){
 		ps.startColor = new Color (Random.Range (0F, 1F), Random.Range (0F, 1F), Random.Range (0F, 1F));
 	}
 
+	private void HandleDoubleTap(int fingerID, Vector2 pos){
+		ChangeToRandomColor ();
+	}
+
+	private void HandleTouchDown(int fingerID, Vector2 pos){
+		if (fingerID == 0)
+			prevPos = pos;
+	}
+
+	private void HandleTouchMove(int fingerID, Vector2 pos){
+		if (fingerID == 0) {
+			Vector3 dir = (pos - prevPos) / 3f;
+			prevPos = pos;
+			transform.Rotate (dir.y, dir.x, 0f);
+		}
+	}
+
+	void OnReset(){
+		transform.rotation = Quaternion.identity;
+	}
 }
